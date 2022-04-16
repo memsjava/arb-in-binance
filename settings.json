@@ -1,0 +1,7 @@
+{
+    "API_SECRET": "Your_key_secret_here",
+    "API_PUBLIC": "Your_public_api_here",
+    "start_coin": "USDT",
+    "live_trade": false,
+    "capital": 50
+}
