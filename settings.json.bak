@@ -1,7 +1,0 @@
-{
-    "API_SECRET": "B4LHlIprb5E2WaCWBp3ILjebdwnI9cs0B0nGPcpdeSTC6XnxVchjAXVkLuWg9vbz",
-    "API_PUBLIC": "Lrm7Gl6i0blvYunGDjSPBXMeyUKiENAQR0UZEqxiyhf3eWMlcbil2S8IeGybmcrx",
-    "start_coin": "USDT",
-    "live_trade": false,
-    "capital": 50
-}
