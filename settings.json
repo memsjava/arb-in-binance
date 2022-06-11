@@ -1,7 +1,8 @@
 {
-    "API_SECRET": "Your_key_secret_here",
-    "API_PUBLIC": "Your_public_api_here",
+    "API_PUBLIC": "api_kei_from_binance",
+    "API_SECRET": "api_secret_key",
     "start_coin": "USDT",
-    "live_trade": false,
-    "capital": 50
+    "interest": 0.3,
+    "live_trade": true,
+    "capital": 10
 }

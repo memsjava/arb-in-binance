@@ -22,7 +22,7 @@ def get_all_triplet(start_coin, data):
                                 primary_coin, '')
                             try:
                                 for key__ in list_key:
-                                    if key__ == secondary_coin+start_coin:
+                                    if key__ == secondary_coin + start_coin:
                                         tertiary = key__
                                         triplet.append(
                                             [primary, secondary, tertiary])
@@ -37,6 +37,7 @@ def get_all_triplet(start_coin, data):
         pass
 
     return triplet
+
 
 # this will filter all pairs which current price more than 0.01
 
@@ -55,57 +56,57 @@ def myFilterIsNotBanned(data, triplet):
 
 
 def my_arbitrage(client, data, triplet, capital, start_coin="USDT"):
-    res = None
+    res, interest = None, None
     if myFilterIsNotBanned(data, triplet):
         try:
             a1 = data[triplet[0]]
             a2 = data[triplet[1]]
             a3 = data[triplet[2]]
             # print ("start usdt:", capital)
-            fee = capital*0.1/100
-            step1 = ((capital-fee) / float(a1["b"]))
+            fee = capital * 0.1 / 100
+            step1 = ((capital - fee) / float(a1["b"]))
             # print (triplet[0], " :", step1)
-            fee = step1*0.1/100
-            step2 = ((step1-fee) / float(a2["b"]))
+            fee = step1 * 0.1 / 100
+            step2 = ((step1 - fee) / float(a2["b"]))
             # print (triplet[1],":", step2)
-            fee = step2*0.1/100
-            step3 = ((step2-fee) * float(a3["a"]))
+            fee = step2 * 0.1 / 100
+            step3 = ((step2 - fee) * float(a3["a"]))
             # print ("usdt :", step3)
 
-            if (step3-capital) / capital*100 > 0.1:
+            if (step3 - capital) / capital * 100 > 0.1:
                 print("start:", start_coin, capital)
                 print(triplet[0], " :", step1, '@', a1["b"])
                 print(triplet[1], ":", step2, '@', a2["b"])
                 print(start_coin, " :", step3, '@', a3["a"])
-                print("way1: " + str((step3-capital) / capital*100)+"%")
-
+                interest = (step3 - capital) / capital * 100
+                print("way1: " + str(interest) + "%")
                 res = 'way1'
 
                 # print (triplet)
                 # print (a1, a2, a3)
 
             # print ("start usdt:", capital)
-            fee = capital*0.1/100
-            step1 = ((capital-fee) / float(a3["b"]))
+            fee = capital * 0.1 / 100
+            step1 = ((capital - fee) / float(a3["b"]))
             # print (triplet[2],":", step1)
-            fee = step1*0.1/100
-            step2 = ((step1-fee) * float(a2["a"]))
+            fee = step1 * 0.1 / 100
+            step2 = ((step1 - fee) * float(a2["a"]))
             # print (triplet[1]," :", step2)
-            fee = step2*0.1/100
-            step3 = ((step2-fee) * float(a1["a"]))
+            fee = step2 * 0.1 / 100
+            step3 = ((step2 - fee) * float(a1["a"]))
             # print ("usdt :", step3)
 
-            if (step3-capital) / capital*100 > 0.1:
+            if (step3 - capital) / capital * 100 > 0.1:
                 print("start:", start_coin, capital)
                 print(triplet[2], ":", step1, '@', a3["b"])
                 print(triplet[1], " :", step2, '@', (a2["a"]))
                 print(start_coin, " :", step3, '@', a1["a"])
-                print("way2: " + str((step3-capital) / capital*100)+"%")
-
+                interest = (step3 - capital) / capital * 100
+                print("way2: " + str(interest) + "%")
                 res = 'way2'
                 # print (triplet)
                 # print (a1, a2, a3)
         except:
             pass
 
-    return res
+    return res, interest

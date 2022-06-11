@@ -1,6 +1,7 @@
 import math
 from binance.helpers import round_step_size
 import time
+from gasykamanja.database import dbManager
 
 
 def get_buy_info(client, symbol_, price_, amount_):
@@ -46,20 +47,20 @@ def sendLmtOrder(client, side, symbol_, amount, price):
         if side == "buy":
             price, amount = get_buy_info(client, symbol_, price, amount)
             print(price, amount)
-            order = client.order_limit_buy(
-                symbol=symbol_,
-                quantity=amount,
-                price=price
-            )
-
+            if amount and price:
+                order = client.order_limit_buy(symbol=symbol_,
+                                               quantity=amount,
+                                               price=price)
         else:
+
             price, amount = get_sell_info(client, symbol_, price, amount)
             print(amount)
-            order = client.order_limit_sell(
-                symbol=symbol_,
-                quantity=amount,
-                price=price,
-            )
+            if amount and price:
+                order = client.order_limit_sell(
+                    symbol=symbol_,
+                    quantity=amount,
+                    price=price,
+                )
         print(price, amount)
     except Exception as e:
         print("order exception", e)
@@ -68,18 +69,43 @@ def sendLmtOrder(client, side, symbol_, amount, price):
 
 def getStatusOrder(client, symbol_, orderId_):
     res = None
-    while True:
-        currentOrder = client.get_order(symbol=symbol_, orderId=orderId_)
-        if currentOrder['status'] == 'FILLED':
-            res = currentOrder['executedQty']
-            break
-        time.sleep(10)
-    print(res)
+    # while True:
+    orderId_ = int(orderId_)
+    currentOrder = client.get_order(symbol=symbol_, orderId=orderId_)
+    if currentOrder['status'] == 'FILLED':
+        res = currentOrder['executedQty']
+        # break
+        # time.sleep(10)
+    # print(res)
     return res
+
+
+def getAndSendOrder(client):
+    dbManage = dbManager()
+    pair, err = dbManage.getActiveOrder()
+    capital = getStatusOrder(client, pair.paire, pair.order_id)
+    if capital:
+        print("order %s: %s %s @ %s is ok" %
+              (pair.order_id, pair.side, pair.paire, pair.price))
+        new_pair, err = dbManage.updateAndSwitchOrder()
+        if new_pair:
+            fee = capital * 0.1 / 100
+            amount = capital - fee
+            order = sendLmtOrder(client, new_pair.side, new_pair.paire, amount,
+                                 new_pair.price)
+            new_pair.amount = amount
+            new_pair.order_id = str(order['orderId'])
+            new_pair.save()
+        else:
+            print(err)
+    else:
+        print("order %s: %s %s @ %s still not filled" %
+              (pair.order_id, pair.side, pair.paire, pair.price))
 
 
 def handleTrade(client, capital, triplet, data, way):
     res = None
+    to_store = []
     try:
         a1 = data[triplet[0]]
         a2 = data[triplet[1]]
@@ -87,57 +113,100 @@ def handleTrade(client, capital, triplet, data, way):
         if way == 'way1':
             side = 'buy'
             symbol_ = triplet[0]
-            fee = capital * 0.1/100
+            fee = capital * 0.1 / 100
             amount = capital - fee
             price = float(a1["b"])
             order = sendLmtOrder(client, side, symbol_, amount, price)
-            capital = getStatusOrder(client, symbol_, order['orderId'])
+            # capital = getStatusOrder(client, symbol_, order['orderId'])
+
+            to_store.append({
+                "paire": symbol_,
+                "side": side,
+                "price": price,
+                "amount": amount
+            })
 
             side = 'buy'
             symbol_ = triplet[1]
-            fee = capital * 0.1/100
-            amount = capital - fee
+            # fee = capital * 0.1 / 100
+            # amount = capital - fee
             price = float(a2["b"])
-            order = sendLmtOrder(client, side, symbol_, amount, price)
-            capital = getStatusOrder(client, symbol_, order['orderId'])
+            # order = sendLmtOrder(client, side, symbol_, amount, price)
+            # capital = getStatusOrder(client, symbol_, order['orderId'])
+            to_store.append({
+                "paire": symbol_,
+                "side": side,
+                "price": price,
+                "amount": 0
+            })
 
             side = 'sell'
             symbol_ = triplet[2]
-            fee = capital * 0.1/100
-            amount = capital - fee
+            # fee = capital * 0.1 / 100
+            # amount = capital - fee
             price = float(a3["a"])
-            order = sendLmtOrder(client, side, symbol_, amount, price)
-            capital = getStatusOrder(client, symbol_, order['orderId'])
-
-            res = capital
+            # order = sendLmtOrder(client, side, symbol_, amount, price)
+            # capital = getStatusOrder(client, symbol_, order['orderId'])
+            # res = capital
+            to_store.append({
+                "paire": symbol_,
+                "side": side,
+                "price": price,
+                "amount": 0
+            })
 
         elif way == 'way2':
             print(way)
             side = 'buy'
             symbol_ = triplet[0]
-            fee = capital * 0.1/100
+            fee = capital * 0.1 / 100
             amount = capital - fee
             price = float(a3["b"])
             order = sendLmtOrder(client, side, symbol_, amount, price)
-            capital = getStatusOrder(client, symbol_, order['orderId'])
+            # capital = getStatusOrder(client, symbol_, order['orderId'])
+            to_store.append({
+                "paire": symbol_,
+                "side": side,
+                "price": price,
+                "amount": amount
+            })
 
             side = 'sell'
             symbol_ = triplet[1]
-            fee = capital * 0.1/100
-            amount = capital - fee
+            fee = capital * 0.1 / 100
+            # amount = capital - fee
             price = float(a2["a"])
-            order = sendLmtOrder(client, side, symbol_, amount, price)
-            capital = getStatusOrder(client, symbol_, order['orderId'])
+            # order = sendLmtOrder(client, side, symbol_, amount, price)
+            # capital = getStatusOrder(client, symbol_, order['orderId'])
+            to_store.append({
+                "paire": symbol_,
+                "side": side,
+                "price": price,
+                "amount": 0
+            })
 
             side = 'sell'
             symbol_ = triplet[2]
-            fee = capital * 0.1/100
-            amount = capital - fee
+            # fee = capital * 0.1 / 100
+            # amount = capital - fee
             price = float(a1["a"])
-            order = sendLmtOrder(client, side, symbol_, amount, price)
-            capital = getStatusOrder(client, symbol_, order['orderId'])
+            # order = sendLmtOrder(client, side, symbol_, amount, price)
+            # capital = getStatusOrder(client, symbol_, order['orderId'])
+            # res = capital
+            to_store.append({
+                "paire": symbol_,
+                "side": side,
+                "price": price,
+                "amount": 0
+            })
+        if order:
+            dbManage = dbManager()
+            tahiry_, error = dbManage.set_orders(to_store)
+            if not error:
+                tahiry_.voalohany_.is_active = True
+                tahiry_.voalohany_.order_id = str(order['orderId'])
+                tahiry_.voalohany_.save()
 
-            res = capital
     except:
         pass
 
