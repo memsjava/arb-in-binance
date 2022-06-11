@@ -113,8 +113,8 @@ class dbManager():
         try:
             active_pair = Pair.get(Pair.is_active == True)
             try:
-                Tahiry.get(Tahiry.voalohany_ == active_pair)
-                res = Tahiry.faharoa_
+                t = Tahiry.get(Tahiry.voalohany_ == active_pair)
+                res = t.faharoa_
                 active_pair.is_succeed = True
                 active_pair.is_active = False
                 active_pair.save()
@@ -122,8 +122,8 @@ class dbManager():
                 res.save()
             except:
                 try:
-                    Tahiry.get(Tahiry.faharoa_ == active_pair)
-                    res = Tahiry.fahatelo_
+                    t = Tahiry.get(Tahiry.faharoa_ == active_pair)
+                    res = t.fahatelo_
                     active_pair.is_succeed = True
                     active_pair.is_active = False
                     active_pair.save()
