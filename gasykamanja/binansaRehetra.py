@@ -74,6 +74,7 @@ def getStatusOrder(client, symbol_, orderId_):
     currentOrder = client.get_order(symbol=symbol_, orderId=orderId_)
     if currentOrder['status'] == 'FILLED':
         res = currentOrder['executedQty']
+        res = float(res)
         # break
         # time.sleep(10)
     # print(res)
@@ -84,6 +85,7 @@ def getAndSendOrder(client):
     dbManage = dbManager()
     pair, err = dbManage.getActiveOrder()
     capital = getStatusOrder(client, pair.paire, pair.order_id)
+    # print(capital)
     if capital:
         print("order %s: %s %s @ %s is ok" %
               (pair.order_id, pair.side, pair.paire, pair.price))
@@ -94,6 +96,7 @@ def getAndSendOrder(client):
             order = sendLmtOrder(client, new_pair.side, new_pair.paire, amount,
                                  new_pair.price)
             new_pair.amount = amount
+            new_pair.is_active = True
             new_pair.order_id = str(order['orderId'])
             new_pair.save()
         else:
