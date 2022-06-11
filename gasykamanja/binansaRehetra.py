@@ -90,15 +90,18 @@ def getAndSendOrder(client):
         print("order %s: %s %s @ %s is ok" %
               (pair.order_id, pair.side, pair.paire, pair.price))
         new_pair, err = dbManage.updateAndSwitchOrder()
+        # update amount with the real amount bought or sold
+        pair.amount = capital
+        pair.save()
         if new_pair:
             fee = capital * 0.1 / 100
             amount = capital - fee
             order = sendLmtOrder(client, new_pair.side, new_pair.paire, amount,
                                  new_pair.price)
-            new_pair.amount = amount
-            new_pair.is_active = True
-            new_pair.order_id = str(order['orderId'])
-            new_pair.save()
+            if order:
+                new_pair.is_active = True
+                new_pair.order_id = str(order['orderId'])
+                new_pair.save()
         else:
             print(err)
     else:
