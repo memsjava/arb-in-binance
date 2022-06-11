@@ -27,7 +27,7 @@ USDT  : 50.10078116544093 @ 0.9999
 way2: 0.20156233088185616%
 ```
 
-## Example explanation:
+## Example:
 way2 means 
 
 buy DEXE from USDT => 
@@ -36,3 +36,18 @@ and sell BSUD to USDT
 
 begin with 50usdt and end with 50.1 usdt. You get 0.2% of your 50 usdt. Enjoy :)
 the order will wait as we use limit order so be carefull.
+
+## Binance orders error:
+1. To avoid Failures in order, we have to respect all filters like bellow:  
+```
+    'filters': [
+        {'filterType': 'PRICE_FILTER', 'minPrice': '0.01000000', 'maxPrice': '10000.00000000', 'tickSize': '0.01000000'}, 
+        {'filterType': 'PERCENT_PRICE', 'multiplierUp': '5', 'multiplierDown': '0.2', 'avgPriceMins': 5}, 
+        {'filterType': 'LOT_SIZE', 'minQty': '0.01000000', 'maxQty': '90000.00000000', 'stepSize': '0.01000000'}, 
+        {'filterType': 'MIN_NOTIONAL', 'minNotional': '10.00000000', 'applyToMarket': True, 'avgPriceMins': 5}, 
+        {'filterType': 'ICEBERG_PARTS', 'limit': 10}, 
+        {'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.00000000', 'maxQty': '5545.10094641', 'stepSize': '0.00000000'}, 
+        {'filterType': 'TRAILING_DELTA', 'minTrailingAboveDelta': 10, 'maxTrailingAboveDelta': 2000, 'minTrailingBelowDelta': 10,'maxTrailingBelowDelta': 2000}, 
+        {'filterType': 'MAX_NUM_ORDERS', 'maxNumOrders': 200}, 
+        {'filterType': 'MAX_NUM_ALGO_ORDERS', 'maxNumAlgoOrders': 5}],
+```
