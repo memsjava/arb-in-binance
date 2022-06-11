@@ -51,3 +51,5 @@ the order will wait as we use limit order so be carefull.
         {'filterType': 'MAX_NUM_ORDERS', 'maxNumOrders': 200}, 
         {'filterType': 'MAX_NUM_ALGO_ORDERS', 'maxNumAlgoOrders': 5}],
 ```
+2. In case you have error, your have to continue manually. 
+Check the sqlite database to see the pairs and price and whether buy/sell
