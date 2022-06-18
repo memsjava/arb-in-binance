@@ -115,20 +115,11 @@ class dbManager():
             try:
                 t = Tahiry.get(Tahiry.voalohany_ == active_pair)
                 res = t.faharoa_
-                active_pair.is_succeed = True
-                active_pair.is_active = False
-                active_pair.save()
-                res.is_active = True
-                res.save()
+
             except:
                 try:
                     t = Tahiry.get(Tahiry.faharoa_ == active_pair)
                     res = t.fahatelo_
-                    active_pair.is_succeed = True
-                    active_pair.is_active = False
-                    active_pair.save()
-                    res.is_active = True
-                    res.save()
                 except:
                     active_pair.is_succeed = True
                     active_pair.is_active = False
@@ -136,4 +127,5 @@ class dbManager():
                     #delete
         except Exception as e:
             err = e
+            print(err)
         return res, err

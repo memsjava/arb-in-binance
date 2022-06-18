@@ -1,3 +1,4 @@
+from cmath import log, log10
 import math
 from binance.helpers import round_step_size
 import time
@@ -41,12 +42,21 @@ def get_symbol_precision(client, _symbol):
     return precision_price, precision_qty
 
 
+def reduce_amount(amount, precision_qty, precision):
+    print(precision)
+    amount = math.floor(float(amount) * (10**precision))
+    amount = amount / ((10**precision))
+    amount = float_precision(amount, precision_qty)
+    return amount
+
+
 def sendLmtOrder(client, side, symbol_, amount, price):
     order = None
     try:
         if side == "buy":
+            # print("amount before", amount)
             price, amount = get_buy_info(client, symbol_, price, amount)
-            print(price, amount)
+            # print(price, amount)
             if amount and price:
                 order = client.order_limit_buy(symbol=symbol_,
                                                quantity=amount,
@@ -54,7 +64,7 @@ def sendLmtOrder(client, side, symbol_, amount, price):
         else:
 
             price, amount = get_sell_info(client, symbol_, price, amount)
-            print(amount)
+            # print(amount)
             if amount and price:
                 order = client.order_limit_sell(
                     symbol=symbol_,
@@ -63,7 +73,30 @@ def sendLmtOrder(client, side, symbol_, amount, price):
                 )
         print(price, amount)
     except Exception as e:
-        print("order exception", e)
+        print("order exception", e, amount, symbol_)
+        if "Account has insufficient balance" in str(e.message):
+            precision_price, precision_qty = get_symbol_precision(
+                client, symbol_)
+
+            precision = 5
+            notStop = True
+            while notStop:
+                precision -= 1
+                amount_ = reduce_amount(amount, precision_qty, precision)
+                if amount_ and price and precision > 0:
+                    print(price, amount_)
+                    try:
+                        order = client.order_limit_buy(symbol=symbol_,
+                                                       quantity=amount_,
+                                                       price=price)
+                        print(order)
+                        notStop = False
+                        break
+                    except Exception as err:
+                        print(err)
+                else:
+                    notStop = False
+
     return order
 
 
@@ -92,13 +125,18 @@ def getAndSendOrder(client):
         new_pair, err = dbManage.updateAndSwitchOrder()
         # update amount with the real amount bought or sold
         pair.amount = capital
+        pair.is_succeed = True
         pair.save()
         if new_pair:
             fee = capital * 0.1 / 100
             amount = capital - fee
             order = sendLmtOrder(client, new_pair.side, new_pair.paire, amount,
                                  new_pair.price)
+            # print("order", order)
             if order:
+                pair.is_active = False
+                pair.save()
+
                 new_pair.is_active = True
                 new_pair.order_id = str(order['orderId'])
                 new_pair.save()

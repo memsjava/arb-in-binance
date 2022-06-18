@@ -50,7 +50,7 @@ class grand_arbirtrage():
                         db_.initialize_db()
                         break
         while True:
-            await asyncio.sleep(15)
+            await asyncio.sleep(20)
             await self.run()
 
     def isFollowOrder(self):
