@@ -115,17 +115,25 @@ class dbManager():
             try:
                 t = Tahiry.get(Tahiry.voalohany_ == active_pair)
                 res = t.faharoa_
-
             except:
+                pass
+            if not res:
                 try:
                     t = Tahiry.get(Tahiry.faharoa_ == active_pair)
                     res = t.fahatelo_
                 except:
-                    active_pair.is_succeed = True
-                    active_pair.is_active = False
-                    active_pair.save()
+                    pass
                     #delete
         except Exception as e:
             err = e
             print(err)
         return res, err
+
+    def closeLastOrder(self):
+        active_pair = Pair.get(Pair.is_active == True)
+        try:
+            Tahiry.get(Tahiry.fahatelo_ == active_pair)
+            active_pair.is_active = False
+            active_pair.save()
+        except Exception as e:
+            print(e)

@@ -133,6 +133,7 @@ def getAndSendOrder(client):
         pair.amount = capital
         pair.is_succeed = True
         pair.save()
+        dbManage.closeLastOrder()
         if new_pair:
             fee = capital * 0.1 / 100
             amount = capital - fee
