@@ -20,7 +20,10 @@ def get_sell_info(client, symbol_, price_, amount_):
 
 
 def float_precision(f, n):
-    f = round_step_size(f, n)
+    # f = round_step_size(f, n)
+    precision = int(round(-math.log(n, 10), 0))
+    f = math.floor(float(f) * (10**precision))
+    f = f / ((10**precision))
     # f = round(f,n)
     #new_qty = "{:0.0{}f}".format(f , n)
     return f  # float(new_qty)
@@ -43,10 +46,10 @@ def get_symbol_precision(client, _symbol):
 
 
 def reduce_amount(amount, precision_qty, precision):
-    print(precision)
+    # print(precision)
     amount = math.floor(float(amount) * (10**precision))
     amount = amount / ((10**precision))
-    amount = float_precision(amount, precision_qty)
+    # amount = float_precision(amount, precision_qty)
     return amount
 
 
@@ -64,7 +67,6 @@ def sendLmtOrder(client, side, symbol_, amount, price):
         else:
 
             price, amount = get_sell_info(client, symbol_, price, amount)
-            # print(amount)
             if amount and price:
                 order = client.order_limit_sell(
                     symbol=symbol_,
@@ -86,10 +88,15 @@ def sendLmtOrder(client, side, symbol_, amount, price):
                 if amount_ and price and precision > 0:
                     print(price, amount_)
                     try:
-                        order = client.order_limit_buy(symbol=symbol_,
-                                                       quantity=amount_,
-                                                       price=price)
-                        print(order)
+                        if side == "buy":
+                            order = client.order_limit_buy(symbol=symbol_,
+                                                           quantity=amount_,
+                                                           price=price)
+                        else:
+                            order = client.order_limit_sell(symbol=symbol_,
+                                                            quantity=amount_,
+                                                            price=price)
+                        # print(order)
                         notStop = False
                         break
                     except Exception as err:
@@ -110,7 +117,6 @@ def getStatusOrder(client, symbol_, orderId_):
         res = float(res)
         # break
         # time.sleep(10)
-    # print(res)
     return res
 
 
@@ -118,7 +124,7 @@ def getAndSendOrder(client):
     dbManage = dbManager()
     pair, err = dbManage.getActiveOrder()
     capital = getStatusOrder(client, pair.paire, pair.order_id)
-    # print(capital)
+    print("getAndSendOrder", capital)
     if capital:
         print("order %s: %s %s @ %s is ok" %
               (pair.order_id, pair.side, pair.paire, pair.price))
