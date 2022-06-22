@@ -49,8 +49,10 @@ class grand_arbirtrage():
                     if car.capitalize() == "R":
                         db_.initialize_db()
                         break
+            else:
+                await self.run()
         while True:
-            await asyncio.sleep(20)
+            await asyncio.sleep(300)
             await self.run()
 
     def isFollowOrder(self):

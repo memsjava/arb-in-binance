@@ -124,7 +124,7 @@ def getAndSendOrder(client):
     dbManage = dbManager()
     pair, err = dbManage.getActiveOrder()
     capital = getStatusOrder(client, pair.paire, pair.order_id)
-    print("getAndSendOrder", capital)
+    # print("getAndSendOrder", capital)
     if capital:
         print("order %s: %s %s @ %s is ok" %
               (pair.order_id, pair.side, pair.paire, pair.price))
