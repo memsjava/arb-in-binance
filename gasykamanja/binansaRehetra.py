@@ -279,3 +279,8 @@ def get_all_data(client):
         print(e)
         pass
     return res
+
+
+def close_active_order(client, pair):
+    result = client.cancel_order(symbol=pair.paire, orderId=pair.order_id)
+    return result

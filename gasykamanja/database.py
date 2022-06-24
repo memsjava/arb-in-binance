@@ -38,8 +38,11 @@ class dbManager():
         self._order_number = 0
         self.connect_db()
 
-    def initialize_db(self):
-        Tahiry.delete().execute()
+    def ignore_current_arb(self):
+        pair, err = self.getActiveOrder()
+        pair.is_active = False
+        pair.save()
+        return pair, err
 
     def connect_db(self):
         try:

@@ -41,19 +41,20 @@ class grand_arbirtrage():
             if a:
                 while True:
                     car = input(
-                        "There is a data in previous arb, continue \"C\" or skip and remove data \"R\": "
+                        "There is a data in previous arb, continue \"C\" or skip current arb \"R\": "
                     )
                     if car.capitalize() == "C":
-                        br.getAndSendOrder(self.client)
+                        # br.getAndSendOrder(self.client)
                         break
                     if car.capitalize() == "R":
-                        db_.initialize_db()
+                        pair, err = db_.ignore_current_arb()
+                        if pair:
+                            br.close_active_order(self.client, pair)
                         break
-            else:
-                await self.run()
+
         while True:
-            await asyncio.sleep(300)
             await self.run()
+            await asyncio.sleep(300)
 
     def isFollowOrder(self):
         db_ = dbManager()
