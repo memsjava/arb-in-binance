@@ -150,8 +150,8 @@ def getAndSendOrder(client):
         else:
             print(err)
     else:
-        print("order %s: %s %s @ %s still not filled" %
-              (pair.order_id, pair.side, pair.paire, pair.price))
+        print("order %s: %s %s %s @ %s still not filled" %
+              (pair.order_id, pair.side, pair.amount, pair.paire, pair.price))
 
 
 def handleTrade(client, capital, triplet, data, way):
