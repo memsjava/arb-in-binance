@@ -18,6 +18,7 @@ pip install -r requirements.txt
 - "start_coin": "USDT", // base coin 
 - "interest": 0.3,      // minimum interest per arb. Sometimes there is dust
 - "live_trade": true,   // true or false
+- "sell_dust": true,    // true or false after the last trade in the current arb
 - "capital": ""         // "" if you want to use balance of base coin above, or put any amount.
 
 5. run

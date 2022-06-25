@@ -20,6 +20,7 @@ class grand_arbirtrage():
                 self.client, self.start_coin)
         self.live_trade = config['live_trade']
         self.interest = config['interest']
+        self.sell_dust = config['sell_dust']
 
     def get_data(self):
         res = br.get_all_data(self.client)
@@ -61,7 +62,7 @@ class grand_arbirtrage():
         if db_.check_written_db():
             a, b = db_.getActiveOrder()
             if a:
-                br.getAndSendOrder(self.client)
+                br.getAndSendOrder(self.client, self.sell_dust)
                 return True
         return False
 

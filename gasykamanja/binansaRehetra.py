@@ -1,4 +1,8 @@
 import math
+from os import symlink
+from regex import E
+
+from urllib3 import Retry
 from gasykamanja.database import dbManager
 
 
@@ -28,6 +32,53 @@ def float_precision(f, n):
 
 def get_balance(client, currency):
     return float(client.get_asset_balance(asset=currency)['free'])
+
+
+def to_btc(client, asset, amount):
+    res, err = None, None
+    if asset == "BTC":
+        res = float(amount)
+    else:
+        symbol = asset + "BTC"
+        try:
+            res = float(
+                client.get_avg_price(symbol=symbol)['price']) * float(amount)
+        except Exception as e:
+            if 'Invalid symbol' in e.message:
+                symbol = "BTC" + asset
+                try:
+                    res = float(client.get_avg_price(symbol=symbol)['price'])
+                    res = 1 / res * float(amount)
+                except:
+                    pass
+            err = e
+    return res
+
+
+def get_dust_amount(client):
+    res, err = None, None
+    try:
+        res = client.get_avg_price(symbol='BTCUSDT')['price']
+        res = 1 / float(res)
+    except Exception as e:
+        err = e
+    return res
+
+
+def get_and_transfert_dust(client):
+    balances = client.get_account()['balances']
+    dust = get_dust_amount(client)
+    dust_assets = []
+    for balance in balances:
+        if float(balance['free']) > 0.0:
+            avg = to_btc(client, balance['asset'], balance['free'])
+            if avg:
+                if avg < dust:
+                    dust_assets.append(balance['asset'])
+    if len(dust_assets):
+        dust_assets = ','.join(dust_assets)
+        client.transfer_dust(asset=dust_assets)
+        print("all dust is converting in BNB right now ...")
 
 
 def get_symbol_precision(client, _symbol):
@@ -114,7 +165,7 @@ def getStatusOrder(client, symbol_, orderId_):
     return res
 
 
-def getAndSendOrder(client):
+def getAndSendOrder(client, sell_dust):
     dbManage = dbManager()
     pair, err = dbManage.getActiveOrder()
     capital = getStatusOrder(client, pair.paire, pair.order_id)
@@ -127,7 +178,9 @@ def getAndSendOrder(client):
         pair.amount = capital
         pair.is_succeed = True
         pair.save()
-        dbManage.closeLastOrder()
+        is_last = dbManage.closeLastOrder()
+        if is_last and sell_dust:
+            get_and_transfert_dust(client)
         if new_pair:
             fee = capital * 0.1 / 100
             amount = capital - fee

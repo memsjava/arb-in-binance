@@ -133,10 +133,13 @@ class dbManager():
         return res, err
 
     def closeLastOrder(self):
+        is_last = False
         active_pair = Pair.get(Pair.is_active == True)
         try:
             Tahiry.get(Tahiry.fahatelo_ == active_pair)
             active_pair.is_active = False
             active_pair.save()
+            is_last = True
         except Exception as e:
-            print(e)
+            pass
+        return is_last
