@@ -1,7 +1,4 @@
-from cmath import log, log10
 import math
-from binance.helpers import round_step_size
-import time
 from gasykamanja.database import dbManager
 
 
@@ -109,14 +106,11 @@ def sendLmtOrder(client, side, symbol_, amount, price):
 
 def getStatusOrder(client, symbol_, orderId_):
     res = None
-    # while True:
     orderId_ = int(orderId_)
     currentOrder = client.get_order(symbol=symbol_, orderId=orderId_)
     if currentOrder['status'] == 'FILLED':
         res = currentOrder['executedQty']
         res = float(res)
-        # break
-        # time.sleep(10)
     return res
 
 
