@@ -54,8 +54,12 @@ class grand_arbirtrage():
                         break
 
         while True:
-            await self.run()
-            await asyncio.sleep(300)
+            try:
+                await self.run()
+                await asyncio.sleep(300)
+            except Exception as e:
+                print(e)
+                await asyncio.sleep(30)
 
     def isFollowOrder(self):
         db_ = dbManager()
@@ -68,9 +72,8 @@ class grand_arbirtrage():
 
     def execute(self):
         print("-------------\n")
+        triplets, data, break_, start_coin = [], [], False, self.start_coin
         data = self.get_data()
-        break_ = False
-        start_coin = self.start_coin
         triplets = self.get_triplet(start_coin, data)
         if triplets:
             capital = self.capital
