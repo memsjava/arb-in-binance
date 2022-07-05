@@ -1,6 +1,7 @@
 import math
 from os import symlink
 from regex import E
+import requests
 
 from urllib3 import Retry
 from gasykamanja.database import dbManager
@@ -184,6 +185,8 @@ def getAndSendOrder(client, sell_dust):
         if new_pair:
             fee = capital * 0.1 / 100
             amount = capital - fee
+            if not isValidPrice(new_pair.paire, new_pair.price):
+                return None
             order = sendLmtOrder(client, new_pair.side, new_pair.paire, amount,
                                  new_pair.price)
             # print("order", order)
@@ -214,6 +217,8 @@ def handleTrade(client, capital, triplet, data, way):
             fee = capital * 0.1 / 100
             amount = capital - fee
             price = float(a1["b"])
+            if not isValidPrice(symbol_, price):
+                return None
             order = sendLmtOrder(client, side, symbol_, amount, price)
             # capital = getStatusOrder(client, symbol_, order['orderId'])
 
@@ -260,6 +265,10 @@ def handleTrade(client, capital, triplet, data, way):
             fee = capital * 0.1 / 100
             amount = capital - fee
             price = float(a3["b"])
+
+            if not isValidPrice(symbol_, price):
+                return None
+
             order = sendLmtOrder(client, side, symbol_, amount, price)
             # capital = getStatusOrder(client, symbol_, order['orderId'])
             to_store.append({
@@ -308,6 +317,16 @@ def handleTrade(client, capital, triplet, data, way):
     except:
         pass
 
+    return res
+
+
+def isValidPrice(symbol, price):
+    res = False
+    a = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=" +
+                     symbol)
+    if abs(
+        (float(a.json()['price']) - float(price)) / float(price) * 100) < 10:
+        res = True
     return res
 
 
